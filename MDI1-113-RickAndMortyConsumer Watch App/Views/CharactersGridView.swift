@@ -8,12 +8,7 @@
 import SwiftUI
 
 struct CharactersGridView: View {
-    private let mockCharacters: [RMCharacter] = [
-        RMCharacter(name: "Rick Sanchez", image: "https://rickandmortyapi.com/api/character/avatar/1.jpeg"),
-        RMCharacter(name: "Rick Sanchez", image: "https://rickandmortyapi.com/api/character/avatar/1.jpeg"),
-        RMCharacter(name: "Rick Sanchez", image: "https://rickandmortyapi.com/api/character/avatar/1.jpeg"),
-        RMCharacter(name: "Rick Sanchez", image: "https://rickandmortyapi.com/api/character/avatar/1.jpeg"),
-    ]
+    @EnvironmentObject private var store: RMCharactersStore
     
     // Defining Number of Columns For Grid
     private let columns = [
@@ -22,45 +17,39 @@ struct CharactersGridView: View {
     ]
     
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: columns, spacing: 6) {
-                ForEach(mockCharacters) { character in
-                    VStack(spacing: 2) {
-                        AsyncImage(url: URL(string: character.image)) { phase in
-                            switch phase {
-                            case .success (let image):
-                                image.resizable()
-                                    .scaledToFit()
-                                    .frame(width: 70, height: 70)
-                                    .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
-                            case .empty:
-                                ZStack {
-                                    RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                        .fill(.secondary.opacity(0.4))
-                                    ProgressView()
-                                }
-                                .frame(width: 70, height: 70)
-                            case .failure:
-                                RoundedRectangle(cornerRadius: 10, style: .continuous)
-                                    .fill(.secondary.opacity(0.4))
-                                Image(systemName: "photo")
-                                        .font(.title3)
-                            @unknown default:
-                                EmptyView()
+        Group {
+            if store.isInitialLoading && store.characters.isEmpty {
+                VStack(spacing: 8) {
+                    ProgressView()
+                    Text("Loading...")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                }
+            } else if let message = store.errorMessage, store.characters.isEmpty {
+                VStack(spacing: 8) {
+                    Image(systemName: "exclamationmark.triangle")
+                        .foregroundStyle(.yellow)
+                    Text(message)
+                        .font(.footnote)
+                        .multilineTextAlignment(.center)
+                }
+            } else {
+                ScrollView {
+                    LazyVGrid(columns: columns, spacing: 6) {
+                        ForEach(store.characters.indices, id: \.self) { idx in
+                            let character = store.characters[idx]
+                            
+                            NavigationLink {
+                                CharacterDetailsView()
+                            } label: {
+                                CharacterTileView(character: character)
                             }
+                            .buttonStyle(.plain)
+                            .task { await store.loadMoreIfNeeded(idx: idx) }
                         }
-                        
-                        Text(character.name)
-                            .font(.caption)
-                            .lineLimit(1)
-                            .frame(maxWidth: .infinity, alignment: .center)
                     }
                 }
             }
         }
     }
-}
-
-#Preview {
-    CharactersGridView()
 }

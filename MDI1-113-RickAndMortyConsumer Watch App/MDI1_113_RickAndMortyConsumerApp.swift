@@ -9,9 +9,18 @@ import SwiftUI
 
 @main
 struct MDI1_113_RickAndMortyConsumer_Watch_AppApp: App {
+    @StateObject private var store = RMCharactersStore()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+//            ContentView()
+            NavigationStack {
+                CharactersGridView()
+            }
+            .environmentObject(store)
+            .task {
+                await store.initialLoad()
+            }
         }
     }
 }
