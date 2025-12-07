@@ -49,4 +49,21 @@ struct RMWebService {
             throw RMApiError.decodeError
         }
     }
+    
+    static func fetchEpisodes() async throws -> [RMEpisode] {
+        guard let url = URL(string: "\(hostName)/episode") else {
+            throw RMApiError.badURL
+        }
+
+        let (data, response) = try await URLSession.shared.data(from: url)
+
+        guard let http = response as? HTTPURLResponse else { throw RMApiError.unknown }
+        guard (200...299).contains(http.statusCode) else {
+            throw RMApiError.httpError(http.statusCode)
+        }
+
+        let decoded = try JSONDecoder().decode(RMEpisodeResponse.self, from: data)
+        return decoded.results
+    }
+
 }

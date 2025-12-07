@@ -40,7 +40,7 @@ struct CharactersGridView: View {
                             let character = store.characters[idx]
                             
                             NavigationLink {
-                                CharacterDetailsView()
+                                CharacterDetailsView(character: character)
                             } label: {
                                 CharacterTileView(character: character)
                             }

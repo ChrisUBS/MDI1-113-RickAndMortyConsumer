@@ -22,4 +22,29 @@ struct RMCharacter: Identifiable, Decodable {
     let id: Int
     let name: String
     let image: String
+    let species: String
+    let status: String
 }
+
+struct RMEpisodeResponse: Decodable {
+    let results: [RMEpisode]
+}
+
+struct RMEpisode: Identifiable, Decodable {
+    let id: Int
+    let name: String
+    let air_date: String
+}
+
+struct RMTrivia {
+    static let randomQuotes = [
+        "Wubba Lubba Dub Dub!",
+        "I'm Pickle Rick!",
+        "Sometimes science is more art than science."
+    ]
+    
+    static func random() -> String {
+        randomQuotes.randomElement()!
+    }
+}
+

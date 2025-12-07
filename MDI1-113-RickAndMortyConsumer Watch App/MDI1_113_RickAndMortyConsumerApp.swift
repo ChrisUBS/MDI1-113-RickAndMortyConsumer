@@ -13,9 +13,8 @@ struct MDI1_113_RickAndMortyConsumer_Watch_AppApp: App {
     
     var body: some Scene {
         WindowGroup {
-//            ContentView()
             NavigationStack {
-                CharactersGridView()
+                ContentView()
             }
             .environmentObject(store)
             .task {
